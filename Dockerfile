@@ -1,6 +1,7 @@
-# ---- Base image: TensorFlow with GPU support ----
-# Falls back to CPU-only if no GPU is available at runtime
-FROM tensorflow/tensorflow:2.16.1-gpu-jupyter
+# ---- Base image: NVIDIA NGC TensorFlow (CUDA 12.8, driver 570+) ----
+# This image supports Blackwell GPUs (RTX 5070, sm_120) out of the box.
+# Falls back to CPU-only if no GPU is available at runtime.
+FROM nvcr.io/nvidia/tensorflow:25.02-tf2-py3
 
 LABEL maintainer="Sam Rossilli - Propel"
 LABEL description="TensorFlow development environment for transformer model experiments"
@@ -23,10 +24,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /workspace
 
 # Copy and install Python dependencies
+# (NGC image already has TF, numpy, etc. — pip will skip what's satisfied)
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir --ignore-installed blinker && \
     pip install --no-cache-dir -r requirements.txt
+
+# Register this Python as the default Jupyter kernel so notebooks
+# use the environment where TF + all dependencies are installed.
+RUN python3 -m ipykernel install --name python3 --display-name "Python 3 (TF)" \
+    && jupyter kernelspec list
 
 # Copy project files
 COPY . .

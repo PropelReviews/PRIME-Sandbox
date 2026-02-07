@@ -1,5 +1,6 @@
 # ---- Core ML / TensorFlow ----
-tensorflow[and-cuda]>=2.16,<2.18
+# TF is pre-installed in the NGC base image — only pin a minimum here.
+tensorflow>=2.16
 tensorflow-datasets>=4.9
 keras>=3.0
 
